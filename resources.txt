@@ -1,0 +1,5 @@
+ADMM slides: https://web.stanford.edu/~boyd/papers/pdf/admm_slides.pdf
+Video explaininig ADMM: https://www.youtube.com/watch?v=Xg0ozgCXXB8
+
+Real-time non-linear optimization in Optimal Feedback Control: 
+https://www.researchgate.net/publication/220258692_A_Real-Time_Iteration_Scheme_for_Nonlinear_Optimization_in_Optimal_Feedback_Control

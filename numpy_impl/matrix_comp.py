@@ -1,9 +1,9 @@
 import numpy as np 
 from scipy.io import savemat
 
-weight_x = 100
-weight_y = 100
-weight_z = 10000000
+weight_x = 10
+weight_y = 10
+weight_z = 0.0001
 
 def Q_generator(Pddot,nbot):
     x_temp = weight_x*np.dot(Pddot.T,Pddot)
