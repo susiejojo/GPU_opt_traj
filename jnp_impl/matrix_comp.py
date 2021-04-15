@@ -1,10 +1,13 @@
 import numpy as np 
-import os
 from scipy.io import savemat
+import os
 
-weight_x = 100
-weight_y = 100
-weight_z = 10000000
+weight_x = 10
+weight_y = 10
+weight_z = 0.0001
+
+paths = os.getcwd()+"/drive/MyDrive/GPU_opt_traj/jnp_impl/"
+
 
 def Q_generator(Pddot,nbot):
     x_temp = weight_x*np.dot(Pddot.T,Pddot)
@@ -35,7 +38,6 @@ def Afc_generator(P,nbot,n_samples):
     return Afc
 
 def inv_matrix_generator(nbot,Pddot,Qx,Qy,Qz,Aeq_x,Aeq_y,Aeq_z,Afc,rho):
-    paths = os.getcwd()+"/drive/MyDrive/GPU_opt_traj/jnp_impl"
     for i in range(len(rho)):
         cost_x = weight_x*np.dot(Pddot.T,Pddot)
         cost_net_x = np.kron(np.eye(nbot,dtype=int),cost_x)
@@ -45,7 +47,7 @@ def inv_matrix_generator(nbot,Pddot,Qx,Qy,Qz,Aeq_x,Aeq_y,Aeq_z,Afc,rho):
         ele_4 = np.zeros((Aeq_x.shape[0],nbot*6))
         upright_x = np.vstack((np.hstack((ele_1,ele_2)),np.hstack((ele_3,ele_4))))
         inv_x = np.linalg.inv(upright_x)
-        savemat(paths+'/matrices/cost_mat_inv_x'+str(i)+'.mat', {'inv_x': inv_x})
+        savemat(paths+'matrices/cost_mat_inv_x'+str(i)+'.mat', {'inv_x': inv_x})
 
         cost_y = weight_y*np.dot(Pddot.T,Pddot)
         cost_net_y = np.kron(np.eye(nbot,dtype=int),cost_x)
@@ -55,7 +57,7 @@ def inv_matrix_generator(nbot,Pddot,Qx,Qy,Qz,Aeq_x,Aeq_y,Aeq_z,Afc,rho):
         ele_4 = np.zeros((Aeq_x.shape[0],nbot*6))
         upright_y = np.vstack((np.hstack((ele_1,ele_2)),np.hstack((ele_3,ele_4))))
         inv_y = np.linalg.inv(upright_y)
-        savemat(paths+'/matrices/cost_mat_inv_y'+str(i)+'.mat', {'inv_y': inv_y})
+        savemat(paths+'matrices/cost_mat_inv_y'+str(i)+'.mat', {'inv_y': inv_y})
 
         cost_z = weight_z*np.dot(Pddot.T,Pddot)
         cost_net_z = np.kron(np.eye(nbot,dtype=int),cost_x)
@@ -65,15 +67,15 @@ def inv_matrix_generator(nbot,Pddot,Qx,Qy,Qz,Aeq_x,Aeq_y,Aeq_z,Afc,rho):
         ele_4 = np.zeros((Aeq_x.shape[0],nbot*6))
         upright_z = np.vstack((np.hstack((ele_1,ele_2)),np.hstack((ele_3,ele_4))))
         inv_z = np.linalg.inv(upright_z)
-        savemat(paths+'/matrices/cost_mat_inv_z'+str(i)+'.mat', {'inv_z': inv_z})
+        savemat(paths+'matrices/cost_mat_inv_z'+str(i)+'.mat', {'inv_z': inv_z})
 
-        savemat(paths+'/matrices/Aeq_x.mat', {'Aeq_x': Aeq_x})
-        savemat(paths+'/matrices/Aeq_y.mat', {'Aeq_y': Aeq_y})
-        savemat(paths+'/matrices/Aeq_z.mat', {'Aeq_z': Aeq_z})
+        savemat(paths+'matrices/Aeq_x.mat', {'Aeq_x': Aeq_x})
+        savemat(paths+'matrices/Aeq_y.mat', {'Aeq_y': Aeq_y})
+        savemat(paths+'matrices/Aeq_z.mat', {'Aeq_z': Aeq_z})
 
-        savemat(paths+'/matrices/Afc.mat', {'Afc': Afc})
+        savemat(paths+'matrices/Afc.mat', {'Afc': Afc})
 
-    savemat(paths+'/matrices/rho.mat', {'rho_init': rho})
+    savemat(paths+'matrices/rho.mat', {'rho_init': rho})
 
 
 

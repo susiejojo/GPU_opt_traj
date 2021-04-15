@@ -107,7 +107,7 @@ beq_x = beq_x.reshape(nbot*6) #flatten beqs to (96*1) dimension
 beq_y = beq_y.reshape(nbot*6)
 beq_z = beq_z.reshape(nbot*6)
 
-print ("beq:",beq_x)
+# print ("beq:",beq_x)
 
 alpha_ij = np.zeros(n_samples*ncomb) #of shape (120*1000,1) as b_fc should be of that shape
 beta_ij = np.zeros(n_samples*ncomb)
@@ -265,7 +265,7 @@ for step in range(planning_iters):
     beq_z = beq_z.reshape(nbot*6)
     # print (beq_x)
 
-    print (np.max(np.abs(res_x)),np.max(np.abs(res_y)),np.max(np.abs(res_z)))
+    # print (np.max(np.abs(res_x)),np.max(np.abs(res_y)),np.max(np.abs(res_z)))
     # print (np.max(res_x)+np.max(res_y)+np.max(res_z))
 
 print('comp time for 3 benchmarks =', time.time()-start)
@@ -285,6 +285,22 @@ path_z.append(z_fin)
 path_x = np.array(path_x).T
 path_y = np.array(path_y).T
 path_z = np.array(path_z).T
+
+coll_violate = []
+for i in range(nbot):
+    x_1 = path_x[i,:]
+    y_1 = path_y[i,:]
+    z_1 = path_z[i,:]
+    for j in range(nbot):
+        if (i!=j):
+            x_2 = path_x[j,:]
+            y_2 = path_y[j,:]
+            z_2 = path_z[j,:]
+            dist = np.square((x_2-x_1))+np.square((y_2-y_1))+np.square((z_2-z_1))
+            coll_violate.append(min(np.sqrt(dist))<a)
+            # print ("Distance between agents at times: ",i," and ",j," = ",min(np.sqrt(dist)))
+print (sum(coll_violate)//2,"violations out of",ncomb)
+            
 # x = np.asnumpy(x,stream=None,order='C')
 # y = np.asnumpy(y,stream=None,order='C')
 # z = np.asnumpy(z,stream=None,order='C')

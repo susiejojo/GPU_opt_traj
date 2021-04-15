@@ -12,20 +12,22 @@ time_ints = time_ints.reshape(n_samples,1)
 P,Pdot,Pddot = bernstein_20_coeffs(time_ints,start_time,total_time)
 print (P.shape,Pdot.shape,Pddot.shape)
 
-n_bot = 16
+n_bot = 32
 
-rho0 = 7
-rho1 = rho0*4.2
-rho2 = rho0*4.2**2
-rho3 = rho0*4.2**3
-rho4 = rho0*4.2**4
-rho5 = rho0*4.2**5
-rho6 = rho0*6.2**6
-rho7 = rho0*6.2**7
-rho8 = rho0*6.2**8
-rho9 = rho0*6.2**9
+# rho0 = 7
+# rho1 = rho0*4.2
+# rho2 = rho0*4.2**2
+# rho3 = rho0*4.2**3
+# rho4 = rho0*4.2**4
+# rho5 = rho0*4.2**5
+# rho6 = rho0*6.2**6
+# rho7 = rho0*6.2**7
+# rho8 = rho0*6.2**8
+# rho9 = rho0*6.2**9
 
-rho = [rho0,rho1,rho2,rho3,rho4,rho5,rho6,rho7,rho8,rho9]
+rho = [1 for i in range(10)]
+
+# rho = [rho0,rho1,rho2,rho3,rho4,rho5,rho6,rho7,rho8,rho9]
 
 Qx,Qy,Qz = Q_generator(Pddot,n_bot)
 Aeq_x,Aeq_y,Aeq_z = Aeq_generator(P,Pdot,Pddot,n_bot)

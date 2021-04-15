@@ -1,4 +1,4 @@
-import cupy as cp
+import numpy as np
 from scipy.special import binom
 
 def bernstein_10_coeffs(t, tmin, tmax):
@@ -44,11 +44,11 @@ def bernstein_10_coeffs(t, tmin, tmax):
     P9ddot = -180.0*t**8 + 72*t**7*(-10.0*t + 10.0)
     P10ddot = 90.0*t**8
 
-    P = cp.hstack((P0, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10 ))
+    P = np.hstack((P0, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10 ))
 
-    Pdot = cp.hstack((P0dot, P1dot, P2dot, P3dot, P4dot, P5dot, P6dot, P7dot, P8dot, P9dot, P10dot ))/l
+    Pdot = np.hstack((P0dot, P1dot, P2dot, P3dot, P4dot, P5dot, P6dot, P7dot, P8dot, P9dot, P10dot ))/l
 
-    Pddot = cp.hstack((P0ddot, P1ddot, P2ddot, P3ddot, P4ddot, P5ddot, P6ddot, P7ddot, P8ddot, P9ddot, P10ddot ))/(l**2)
+    Pddot = np.hstack((P0ddot, P1ddot, P2ddot, P3ddot, P4ddot, P5ddot, P6ddot, P7ddot, P8ddot, P9ddot, P10ddot ))/(l**2)
 
 
     return P, Pdot, Pddot

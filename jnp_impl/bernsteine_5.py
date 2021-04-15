@@ -1,4 +1,4 @@
-import cupy as cp
+import numpy as np
 from scipy.special import binom
 
 def bernstein_5_coeffs(t, tmin, tmax):
@@ -27,11 +27,11 @@ def bernstein_5_coeffs(t, tmin, tmax):
     P4ddot = binom(n,4)*(-4*t**2*(5*t - 3))
     P5ddot = binom(n,5)*(20*t**3)
 
-    P = cp.hstack((P0, P1, P2, P3, P4, P5 ))
+    P = np.hstack((P0, P1, P2, P3, P4, P5 ))
 
-    Pdot = cp.hstack((P0dot, P1dot, P2dot, P3dot, P4dot, P5dot))/l
+    Pdot = np.hstack((P0dot, P1dot, P2dot, P3dot, P4dot, P5dot))/l
 
-    Pddot = cp.hstack((P0ddot, P1ddot, P2ddot, P3ddot, P4ddot, P5ddot))/(l**2)
+    Pddot = np.hstack((P0ddot, P1ddot, P2ddot, P3ddot, P4ddot, P5ddot))/(l**2)
 
 
     return P, Pdot, Pddot
