@@ -12,7 +12,7 @@ time_ints = time_ints.reshape(n_samples,1)
 P,Pdot,Pddot = bernstein_20_coeffs(time_ints,start_time,total_time)
 print (P.shape,Pdot.shape,Pddot.shape)
 
-n_bot = 32
+n_bot = 8
 
 # rho0 = 7
 # rho1 = rho0*4.2

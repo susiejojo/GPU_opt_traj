@@ -75,6 +75,7 @@ rho = jnp.asarray(loadmat(paths+'matrices/rho.mat')['rho_init'][0])
 
 
 x_init, y_init, z_init, x_fin, y_fin, z_fin, a, nbot = init_final_pos()
+a*=2
 
 ncomb = int(binom(nbot,2))
 # print (x_init)
@@ -191,7 +192,7 @@ def pred_traj(ncomb,nvar,nbot,b_xfc,b_yfc,b_zfc,rho,a,d_ij,alpha_ij,beta_ij,lamb
     
 
 n_iters = 1
-planning_iters = 500
+planning_iters = 1000
 cost_x = []
 cost_y = []
 cost_z = []
@@ -212,8 +213,8 @@ for step in range(planning_iters):
       cost_y.append(jnp.max(jnp.abs(res_y)))
       cost_z.append(jnp.max(jnp.abs(res_z)))
 
-      if (jnp.max(jnp.abs(res_x))<0.02 and jnp.max(jnp.abs(res_y))<0.02 and jnp.max(jnp.abs(res_z))<0.02):
-          break
+      # if (jnp.max(jnp.abs(res_x))<0.02 and jnp.max(jnp.abs(res_y))<0.02 and jnp.max(jnp.abs(res_z))<0.02):
+      #     break
   if (step!=0):
     comp_time.append(time.time()-start)
   # print('comp time for 1 iter =', time.time()-start)
@@ -262,9 +263,9 @@ for i in range(nbot):
             y_2 = path_y[j,:]
             z_2 = path_z[j,:]
             dist = jnp.square((x_2-x_1))+jnp.square((y_2-y_1))+jnp.square((z_2-z_1))
-            coll_violate.append(min(jnp.sqrt(dist))<a)
+            coll_violate.append(sum(jnp.sqrt(dist)<a))
             # print ("Distance between agents at times: ",i," and ",j," = ",min(jnp.sqrt(dist)))
-print (sum(coll_violate)//2,"violations out of",ncomb)
+print (sum(coll_violate)//2,"violations out of",ncomb*100)
             
 # x = jnp.asnumpy(x,stream=None,order='C')
 # y = jnp.asnumpy(y,stream=None,order='C')
