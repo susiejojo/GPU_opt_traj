@@ -1,0 +1,12 @@
+999 iter = 84 collisions only opti
+999 iter = 122 collisions RVO+opti
+100 planning_iter = 80 collisions
+
+***********************************NEW*************************************
+
+With adaptive rho:
+
+only opti: 326 iters = 60 collisions
+RVO+opti : 335 iters = 78 collisions
+
+

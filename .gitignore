@@ -1,3 +1,7 @@
 cupy_impl/__pycache__/
 jnp_impl/__pycache__/
 __pycache__/
+numpy_impl/data/
+numpy_impl/matrices/
+numpy_RVO/data/
+numpy_RVO/matrices/
