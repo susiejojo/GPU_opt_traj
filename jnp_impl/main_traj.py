@@ -23,7 +23,7 @@ P = jnp.asarray(P)
 Pdot = jnp.asarray(Pdot)
 Pddot = jnp.asarray(Pddot)
 
-paths = os.getcwd()+"/drive/MyDrive/GPU_opt_traj/jnp_impl/"
+paths = os.getcwd()+"/"
 cost_mat_inv_x0 = jnp.asarray(loadmat(paths+'matrices/cost_mat_inv_x0.mat')['inv_x'])
 cost_mat_inv_y0 = jnp.asarray(loadmat(paths+'matrices/cost_mat_inv_y0.mat')['inv_y'])
 cost_mat_inv_z0 = jnp.asarray(loadmat(paths+'matrices/cost_mat_inv_z0.mat')['inv_z'])
@@ -101,11 +101,10 @@ beq_x = beq_x.reshape(nbot*6) #flatten beqs to (96*1) dimension
 beq_y = beq_y.reshape(nbot*6)
 beq_z = beq_z.reshape(nbot*6)
 
-# print ("beq:",beq_x)
+alpha_ij = loadmat('params.mat')['alpha']
+beta_ij = loadmat('params.mat')['beta']
+d_ij = loadmat('params.mat')['d']
 
-alpha_ij = jnp.zeros(n_samples*ncomb) #of shape (120*1000,1) as b_fc should be of that shape
-beta_ij = jnp.zeros(n_samples*ncomb)
-d_ij = jnp.ones(n_samples*ncomb)
 lambda_xij = jnp.zeros(n_samples*ncomb)
 lambda_yij = jnp.zeros(n_samples*ncomb)
 lambda_zij = jnp.zeros(n_samples*ncomb)
@@ -187,12 +186,11 @@ def pred_traj(ncomb,nvar,nbot,b_xfc,b_yfc,b_zfc,rho,a,d_ij,alpha_ij,beta_ij,lamb
     lambda_yij += rho*res_y
     lambda_zij += rho*res_z
 
-    return x_pred,y_pred,z_pred, vx_pred, vy_pred, vz_pred, ax_pred, ay_pred, az_pred, res_x,res_y,res_z, lambda_xij,lambda_yij,lambda_zij,d_ij,alpha_ij,beta_ij, xij, yij, zij, tij
+    return x_pred,y_pred,z_pred, vx_pred, vy_pred, vz_pred, ax_pred, ay_pred, az_pred, res_x,res_y,res_z, lambda_xij,lambda_yij,lambda_zij,d_ij,alpha_ij,beta_ij, xij, yij, zij
 
     
 
-n_iters = 1
-planning_iters = 1000
+n_iters = 100
 cost_x = []
 cost_y = []
 cost_z = []
@@ -200,41 +198,58 @@ path_x = []
 path_y = []
 path_z = []
 comp_time = []
+start = time.time()
 
-for step in range(planning_iters):
-  start = time.time()
 
-    #planning for 100 steps ahead
-  for i in range(n_iters):
-      pred_traj_jit = jit(pred_traj,static_argnums=(0,1,2,))
-      x,y,z,vx_pred,vy_pred,vz_pred,ax_pred,ay_pred,az_pred,res_x,res_y,res_z,lambda_xij,lambda_yij,lambda_zij,d_ij,alpha_ij,beta_ij,xij, yij, zij, tij = pred_traj_jit(ncomb,nvar,nbot,b_xfc,b_yfc,b_zfc, rho[0],a,d_ij,alpha_ij,beta_ij,lambda_xij,lambda_yij,lambda_zij,Afc,P,beq_x,beq_y,beq_z,cost_mat_inv_x0,cost_mat_inv_y0,cost_mat_inv_z0)
-          
-      cost_x.append(jnp.max(jnp.abs(res_x)))
-      cost_y.append(jnp.max(jnp.abs(res_y)))
-      cost_z.append(jnp.max(jnp.abs(res_z)))
+for i in range(n_iters):
+  if (i<=0.1*n_iters):
+    rho_w_alpha = rho[0]
+    x,y,z,vx_pred,vy_pred,vz_pred,ax_pred,ay_pred,az_pred,res_x,res_y,res_z,lambda_xij,lambda_yij,lambda_zij,d_ij,alpha_ij,beta_ij,xij, yij, zij = pred_traj(ncomb,nvar,nbot,b_xfc,b_yfc,b_zfc,rho_w_alpha,a,d_ij,alpha_ij,beta_ij,lambda_xij,lambda_yij,lambda_zij,Afc,P,beq_x,beq_y,beq_z,cost_mat_inv_x0,cost_mat_inv_y0,cost_mat_inv_z0)  
+    
+  if (i>0.1*n_iters and i<=0.2*n_iters):
+    rho_w_alpha = rho[1]
+    x,y,z,vx_pred,vy_pred,vz_pred,ax_pred,ay_pred,az_pred,res_x,res_y,res_z,lambda_xij,lambda_yij,lambda_zij,d_ij,alpha_ij,beta_ij,xij, yij, zij = pred_traj(ncomb,nvar,nbot,b_xfc,b_yfc,b_zfc,rho_w_alpha,a,d_ij,alpha_ij,beta_ij,lambda_xij,lambda_yij,lambda_zij,Afc,P,beq_x,beq_y,beq_z,cost_mat_inv_x1,cost_mat_inv_y1,cost_mat_inv_z1)  
 
-      # if (jnp.max(jnp.abs(res_x))<0.02 and jnp.max(jnp.abs(res_y))<0.02 and jnp.max(jnp.abs(res_z))<0.02):
-      #     break
-  if (step!=0):
-    comp_time.append(time.time()-start)
-  # print('comp time for 1 iter =', time.time()-start)
-  path_x.append(x[:,0])
-  # print (x.shape)
-  # print (x[:,0])
-  path_y.append(y[:,0])
-  path_z.append(z[:,0])
-  beq_x = jnp.vstack((x[:,1],vx_pred[:,1],ax_pred[:,1],x_fin,vx_fin,ax_fin)).T 
-  beq_y = jnp.vstack((y[:,1],vy_pred[:,1],ay_pred[:,1],y_fin,vy_fin,ay_fin)).T
-  beq_z = jnp.vstack((z[:,1],vz_pred[:,1],az_pred[:,1],z_fin,vz_fin,az_fin)).T
-
-  beq_x = beq_x.reshape(nbot*6)
-  beq_y = beq_y.reshape(nbot*6)
-  beq_z = beq_z.reshape(nbot*6)
-  # print (beq_x)
-
-  # print (jnp.max(jnp.abs(res_x)),jnp.max(jnp.abs(res_y)),jnp.max(jnp.abs(res_z)))
-  # print (jnp.max(res_x)+jnp.max(res_y)+jnp.max(res_z))
-print ("Mean compute time for each iter:",jnp.mean(jnp.array(comp_time)))
+  if (i>0.2*n_iters and i<=0.3*n_iters):
+    rho_w_alpha = rho[2]
+    x,y,z,vx_pred,vy_pred,vz_pred,ax_pred,ay_pred,az_pred,res_x,res_y,res_z,lambda_xij,lambda_yij,lambda_zij,d_ij,alpha_ij,beta_ij,xij, yij, zij = pred_traj(ncomb,nvar,nbot,b_xfc,b_yfc,b_zfc,rho_w_alpha,a,d_ij,alpha_ij,beta_ij,lambda_xij,lambda_yij,lambda_zij,Afc,P,beq_x,beq_y,beq_z,cost_mat_inv_x2,cost_mat_inv_y2,cost_mat_inv_z2)  
+    
+  if (i>0.3*n_iters and i<=0.4*n_iters):
+    rho_w_alpha = rho[3]
+    x,y,z,vx_pred,vy_pred,vz_pred,ax_pred,ay_pred,az_pred,res_x,res_y,res_z,lambda_xij,lambda_yij,lambda_zij,d_ij,alpha_ij,beta_ij,xij, yij, zij = pred_traj(ncomb,nvar,nbot,b_xfc,b_yfc,b_zfc,rho_w_alpha,a,d_ij,alpha_ij,beta_ij,lambda_xij,lambda_yij,lambda_zij,Afc,P,beq_x,beq_y,beq_z,cost_mat_inv_x3,cost_mat_inv_y3,cost_mat_inv_z3)  
+    
+  if (i>0.4*n_iters and i<=0.5*n_iters):
+    rho_w_alpha = rho[4]
+    x,y,z,vx_pred,vy_pred,vz_pred,ax_pred,ay_pred,az_pred,res_x,res_y,res_z,lambda_xij,lambda_yij,lambda_zij,d_ij,alpha_ij,beta_ij,xij, yij, zij = pred_traj(ncomb,nvar,nbot,b_xfc,b_yfc,b_zfc,rho_w_alpha,a,d_ij,alpha_ij,beta_ij,lambda_xij,lambda_yij,lambda_zij,Afc,P,beq_x,beq_y,beq_z,cost_mat_inv_x4,cost_mat_inv_y4,cost_mat_inv_z4)  
+    
+  if (i>0.5*n_iters and i<=0.6*n_iters):
+    rho_w_alpha = rho[5]
+    x,y,z,vx_pred,vy_pred,vz_pred,ax_pred,ay_pred,az_pred,res_x,res_y,res_z,lambda_xij,lambda_yij,lambda_zij,d_ij,alpha_ij,beta_ij,xij, yij, zij = pred_traj(ncomb,nvar,nbot,b_xfc,b_yfc,b_zfc,rho_w_alpha,a,d_ij,alpha_ij,beta_ij,lambda_xij,lambda_yij,lambda_zij,Afc,P,beq_x,beq_y,beq_z,cost_mat_inv_x5,cost_mat_inv_y5,cost_mat_inv_z5)  
+    
+  if (i>0.6*n_iters and i<=0.7*n_iters):
+    rho_w_alpha = rho[6]
+    x,y,z,vx_pred,vy_pred,vz_pred,ax_pred,ay_pred,az_pred,res_x,res_y,res_z,lambda_xij,lambda_yij,lambda_zij,d_ij,alpha_ij,beta_ij,xij, yij, zij = pred_traj(ncomb,nvar,nbot,b_xfc,b_yfc,b_zfc,rho_w_alpha,a,d_ij,alpha_ij,beta_ij,lambda_xij,lambda_yij,lambda_zij,Afc,P,beq_x,beq_y,beq_z,cost_mat_inv_x6,cost_mat_inv_y6,cost_mat_inv_z6)  
+    
+  if (i>0.7*n_iters and i<=0.8*n_iters):
+    rho_w_alpha = rho[7]
+    x,y,z,vx_pred,vy_pred,vz_pred,ax_pred,ay_pred,az_pred,res_x,res_y,res_z,lambda_xij,lambda_yij,lambda_zij,d_ij,alpha_ij,beta_ij,xij, yij, zij = pred_traj(ncomb,nvar,nbot,b_xfc,b_yfc,b_zfc,rho_w_alpha,a,d_ij,alpha_ij,beta_ij,lambda_xij,lambda_yij,lambda_zij,Afc,P,beq_x,beq_y,beq_z,cost_mat_inv_x7,cost_mat_inv_y7,cost_mat_inv_z7)  
+    
+  if (i>0.8*n_iters and i<=0.9*n_iters):
+    rho_w_alpha = rho[8]
+    x,y,z,vx_pred,vy_pred,vz_pred,ax_pred,ay_pred,az_pred,res_x,res_y,res_z,lambda_xij,lambda_yij,lambda_zij,d_ij,alpha_ij,beta_ij,xij, yij, zij = pred_traj(ncomb,nvar,nbot,b_xfc,b_yfc,b_zfc,rho_w_alpha,a,d_ij,alpha_ij,beta_ij,lambda_xij,lambda_yij,lambda_zij,Afc,P,beq_x,beq_y,beq_z,cost_mat_inv_x8,cost_mat_inv_y8,cost_mat_inv_z8)  
+    
+  if (i>0.9*n_iters and i<=n_iters):
+    rho_w_alpha = rho[9]
+    x,y,z,vx_pred,vy_pred,vz_pred,ax_pred,ay_pred,az_pred,res_x,res_y,res_z,lambda_xij,lambda_yij,lambda_zij,d_ij,alpha_ij,beta_ij,xij, yij, zij = pred_traj(ncomb,nvar,nbot,b_xfc,b_yfc,b_zfc,rho_w_alpha,a,d_ij,alpha_ij,beta_ij,lambda_xij,lambda_yij,lambda_zij,Afc,P,beq_x,beq_y,beq_z,cost_mat_inv_x9,cost_mat_inv_y9,cost_mat_inv_z9)  
+  
+  cost_x.append(jnp.max(jnp.abs(res_x)))
+  cost_y.append(jnp.max(jnp.abs(res_y)))
+  cost_z.append(jnp.max(jnp.abs(res_z)))
+  # print ("Optimizer after iter ",i," with residual ",jnp.max(jnp.abs(res_x)),jnp.max(jnp.abs(res_y)),jnp.max(jnp.abs(res_z)))
+  if (jnp.max(jnp.abs(res_x))<0.04 and jnp.max(jnp.abs(res_y))<0.04 and jnp.max(jnp.abs(res_z))<0.04):
+    break
+  
+print ("Compute time:",time.time()-start)
 fig = plt.figure(figsize=plt.figaspect(1))
 # ax = fig.add_subplot(111, projection='3d')
 plt.plot(cost_x, '-r', linewidth = 3.0)
@@ -243,10 +258,9 @@ plt.plot(cost_z, '-g', linewidth = 3.0)
 plt.legend(["Res_x","Res_y","Res_z"])
 plt.show()
 
-# print (path_x)
-path_x.append(x_fin)
-path_y.append(y_fin)
-path_z.append(z_fin)
+path_x = x
+path_y = y
+
 # print (x,y,z)
 path_x = jnp.array(path_x).T
 path_y = jnp.array(path_y).T

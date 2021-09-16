@@ -6,7 +6,7 @@ weight_x = 10
 weight_y = 10
 weight_z = 0.0001
 
-paths = os.getcwd()+"/drive/MyDrive/GPU_opt_traj/jnp_impl/"
+paths = os.getcwd()+"/"
 
 
 def Q_generator(Pddot,nbot):

@@ -12,7 +12,7 @@ import matplotlib
 matplotlib.rcParams['pdf.fonttype'] = 42
 matplotlib.rcParams['ps.fonttype'] = 42
 plt.rcParams.update({'font.size': 15})
-paths = os.getcwd()+"/drive/MyDrive/GPU_opt_traj/jnp_impl/"
+paths = os.getcwd()+"/"
 
 rad = sys.argv[1]
 
@@ -50,7 +50,7 @@ z_1 = z_temp['z'].squeeze()
 # z_3 = z_temp['z_3'].squeeze()
 
 #################ploting ####################
-
+print (x_1,y_1,z_1)
 fig = plt.figure(figsize=plt.figaspect(1))
 ax = fig.add_subplot(111, projection='3d')
 ax.plot(x_1[0],y_1[0],z_1[0], '-r', linewidth = 3.0)

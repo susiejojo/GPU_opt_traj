@@ -3,7 +3,7 @@ import json
 
 def init_final_pos():
 
-	f = open("/content/drive/MyDrive/GPU_opt_traj/jnp_impl/dataset/8_agents_10.json","r")
+	f = open("dataset/64_agents_12.json","r")
 	data = json.loads(f.read())
 	x_init = []
 	y_init = []
