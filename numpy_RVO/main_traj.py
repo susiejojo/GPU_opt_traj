@@ -173,9 +173,9 @@ def pred_traj(ncomb,nvar,nbot,b_xfc,b_yfc,rho,a,d_ij,alpha_ij,lambda_xij,lambda_
     # tij = xij/np.cos(alpha_ij)
     # beta_ij = np.arctan2(tij,zij)
 
-    c2_d = (lambda_xij*np.cos(alpha_ij) + lambda_yij*np.sin(alpha_ij) + rho*xij*np.cos(alpha_ij)+ rho*yij*np.sin(alpha_ij))
+    c2_d = 1.0*a*(lambda_xij*np.cos(alpha_ij) + lambda_yij*np.sin(alpha_ij) + rho*xij*np.cos(alpha_ij)+ rho*yij*np.sin(alpha_ij))
 
-    d_temp_1 = c2_d[:ncomb*n_samples]/(a*rho)
+    d_temp_1 = c2_d[:ncomb*n_samples]/(1.0*a**2*rho)
     d_ij = np.maximum(np.ones(ncomb*n_samples), d_temp_1)
 
     res_x = xij-a*d_ij*np.cos(alpha_ij)
@@ -205,8 +205,8 @@ def recompute_params(nbot,x,y,rho,lambda_xij,lambda_yij,a):
   # print (xij.shape)
   yij = np.array(yij)
   alpha_ij = np.arctan2(yij,xij)
-  c2_d = (lambda_xij*np.cos(alpha_ij) + lambda_yij*np.sin(alpha_ij) + rho*xij*np.cos(alpha_ij)+ rho*yij*np.sin(alpha_ij))
-  d_temp_1 = c2_d[:ncomb*n_samples]/(a*rho)
+  c2_d = 1.0*a*(lambda_xij*np.cos(alpha_ij) + lambda_yij*np.sin(alpha_ij) + rho*xij*np.cos(alpha_ij)+ rho*yij*np.sin(alpha_ij))
+  d_temp_1 = c2_d[:ncomb*n_samples]/(1.0*a**2*rho)
   d_ij = np.maximum(np.ones(ncomb*n_samples), d_temp_1)
   res_x = xij-a*d_ij*np.cos(alpha_ij)
   res_y = yij-a*d_ij*np.sin(alpha_ij)
@@ -315,6 +315,7 @@ print (path_x.shape)
 
 ### Uncomment to find out no of collisions
 coll_violate = []
+mins = []
 for i in range(nbot):
     x_1 = path_x[i,:]
     y_1 = path_y[i,:]
@@ -324,9 +325,11 @@ for i in range(nbot):
             x_2 = path_x[j,:]
             y_2 = path_y[j,:]
             dist = np.square((x_2-x_1))+np.square((y_2-y_1))
-            # print (np.sqrt(dist))
+            new = (np.min(np.sqrt(dist)))
+            mins.append(np.min(new))
             coll_violate.append(sum(np.sqrt(dist)<a))
 print (sum(coll_violate)//2,"violations out of",ncomb*100)
+print (np.min(mins))
             
 # x = np.asnumpy(x,stream=None,order='C')
 # y = np.asnumpy(y,stream=None,order='C')

@@ -181,9 +181,9 @@ def pred_traj(ncomb,nvar,nbot,b_xfc,b_yfc,rho,a,d_ij,alpha_ij,lambda_xij,lambda_
     # tij = xij/np.cos(alpha_ij)
     # beta_ij = np.arctan2(tij,zij)
 
-    c2_d = (lambda_xij*np.cos(alpha_ij) + lambda_yij*np.sin(alpha_ij) + rho*xij*np.cos(alpha_ij)+ rho*yij*np.sin(alpha_ij))
+    c2_d = a*(lambda_xij*np.cos(alpha_ij) + lambda_yij*np.sin(alpha_ij) + rho*xij*np.cos(alpha_ij)+ rho*yij*np.sin(alpha_ij))
 
-    d_temp_1 = c2_d[:ncomb*n_samples]/(a*rho)
+    d_temp_1 = c2_d[:ncomb*n_samples]/(a**2*rho)
     d_ij = np.maximum(np.ones(ncomb*n_samples), d_temp_1)
 
     res_x = xij-a*d_ij*np.cos(alpha_ij)
